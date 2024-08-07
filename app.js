@@ -6,6 +6,9 @@ const
   express = require('express'),
   body_parser = require('body-parser');
 
+
+require('dotenv').config()
+
 // const fetch = require('node-fetch');
 const { Blob } = require('buffer'); 
 
@@ -144,6 +147,9 @@ app.get('/webhook', (req, res) => {
   let mode = req.query['hub.mode'];
   let token = req.query['hub.verify_token'];
   let challenge = req.query['hub.challenge'];
+
+//   console.log(mode,token,challenge);
+//   console.log(VERIFY_TOKEN);
     
   // Check if a token and mode were sent
   if (mode && token) {
@@ -157,6 +163,7 @@ app.get('/webhook', (req, res) => {
     
     } else {
       // Responds with '403 Forbidden' if verify tokens do not match
+      console.log("Forbidden")
       res.sendStatus(403);      
     }
   }

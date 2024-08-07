@@ -15,7 +15,7 @@ require('dotenv').config()
 
 const  app = express();
 
-app.use(cors());
+// app.use(cors());
 app.use(express.json());
 app.use(body_parser.json()); 
 
@@ -52,6 +52,7 @@ const sendMessage = async(sender_psid, player_id, message, title, image_url) => 
       }
     }
   };
+  console.log("Before post");
   await axios.post(`https://graph.facebook.com/v16.0/me/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`, request_body, {
     headers: {
       'Content-Type': 'application/json'
@@ -63,6 +64,7 @@ const sendMessage = async(sender_psid, player_id, message, title, image_url) => 
   .catch(error => {
     console.error('Unable to send message:', error.response ? error.response.data : error.message);
   });
+  console.log("After post");
 }
 
 

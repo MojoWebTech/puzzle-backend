@@ -86,7 +86,7 @@ app.post('/webhook', (req, res) => {
 
     body.entry.forEach((entry)=>{
       let event = entry.messaging[0];
-      console.log("hii ",event);
+      // console.log("hii ",event);
       if (event.game_play) 
       {
         var senderId = event.sender.id; // Messenger sender id
@@ -95,10 +95,10 @@ app.post('/webhook', (req, res) => {
 
         if(payload)
         {
-          console.log(payload);
+          // console.log(payload);
           var playerWon = JSON.parse(payload).playerWon;
           var image_url = JSON.parse(payload).image_url;
-          console.log(playerWon);
+          // console.log(playerWon);
           if (playerWon) 
           {
             sendMessage(
@@ -118,10 +118,10 @@ app.post('/webhook', (req, res) => {
               'Rematch!',
               image_url
             );
-            console.log("....")
+            // console.log("....")
           }
 
-          console.log("Sent message")
+          // console.log("Sent message")
 
         }
       }

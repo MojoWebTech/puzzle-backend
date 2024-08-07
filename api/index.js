@@ -1,25 +1,22 @@
 'use strict';
 
-const 
-  cors = require('cors'),
-  request = require('request'),
-  express = require('express'),
-  body_parser = require('body-parser');
+const cors = require('cors');
+const request = require('request');
+const express = require('express');
+const  body_parser = require('body-parser');
+const { Blob } = require('buffer'); 
+const https = require('https');
+// const fetch = require('node-fetch');
 
 
 require('dotenv').config()
 
-// const fetch = require('node-fetch');
-const { Blob } = require('buffer'); 
-
-const https = require('https');
 
 const  app = express();
 
 app.use(cors());
-
 app.use(express.json());
-app.use(body_parser.json()); // creates express http server
+app.use(body_parser.json()); 
 
 const sendMessage = (sender_psid, player_id, message, title, image_url) => {
   // Construct the message body
@@ -70,9 +67,7 @@ const sendMessage = (sender_psid, player_id, message, title, image_url) => {
   
 }
 
-
-// Sets server port and logs message on success
-app.listen(process.env.PORT || 1337, () => console.log('webhook is listening'));
+app.get("/", (req, res) => res.send("Express on Vercel"));
 
 // Accepts POST requests at /webhook endpoint
 app.post('/webhook', (req, res) => {  
@@ -209,3 +204,4 @@ app.get('/webhook', (req, res) => {
 
 
 
+app.listen(3000, () => console.log("Server ready on port 3000."));

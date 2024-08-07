@@ -90,13 +90,12 @@ app.post('/webhook', (req, res) => {
         var playerId = event.game_play.player_id; // Instant Games player id
         var payload = event.game_play.payload;
 
-
         if(payload)
         {
           console.log(payload);
           var playerWon = JSON.parse(payload).playerWon;
           var image_url = JSON.parse(payload).image_url;
-          // console.log(playerWon);
+          console.log(playerWon);
           if (playerWon) 
           {
             sendMessage(
@@ -117,6 +116,8 @@ app.post('/webhook', (req, res) => {
               image_url
             );
           }
+
+          console.log("Sent message")
 
         }
       }

@@ -6,7 +6,7 @@ const
   express = require('express'),
   body_parser = require('body-parser');
 
-const fetch = require('node-fetch');
+// const fetch = require('node-fetch');
 const { Blob } = require('buffer'); 
 
 const https = require('https');
@@ -162,43 +162,43 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-app.post('/convert-image', async(req, res) => {
-  const { imageUrl } = req.body;
-  console.log(imageUrl)
+// app.post('/convert-image', async(req, res) => {
+//   const { imageUrl } = req.body;
+//   console.log(imageUrl)
 
-  if (!imageUrl) {
-    return res.status(400).json({ error: 'Image URL is required' });
-  }
+//   if (!imageUrl) {
+//     return res.status(400).json({ error: 'Image URL is required' });
+//   }
 
-  try {
-    // Parse the URL
-    const response = await fetch(imageUrl);
-    // const blob = await response.blob();
+//   try {
+//     // Parse the URL
+//     const response = await fetch(imageUrl);
+//     // const blob = await response.blob();
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch image');
-    }
+//     if (!response.ok) {
+//       throw new Error('Failed to fetch image');
+//     }
 
-        // Convert the response to a Buffer
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+//         // Convert the response to a Buffer
+//     const arrayBuffer = await response.arrayBuffer();
+//     const buffer = Buffer.from(arrayBuffer);
 
-    // Set appropriate headers for sending the image
-    res.setHeader('Content-Type', response.headers.get('content-type'));
-    res.setHeader('Content-Disposition', 'inline; filename=image.jpg');
+//     // Set appropriate headers for sending the image
+//     res.setHeader('Content-Type', response.headers.get('content-type'));
+//     res.setHeader('Content-Disposition', 'inline; filename=image.jpg');
 
-    // Send the Buffer back to the client
-    res.send(buffer);
+//     // Send the Buffer back to the client
+//     res.send(buffer);
 
     
-      // console.log(blob);
-      // res.send(blob);
+//       // console.log(blob);
+//       // res.send(blob);
 
-  } catch (error) {
-    console.error('Error processing request:', error.message);
-    res.status(500).json({ error: 'Failed to process request' });
-  }
-});
+//   } catch (error) {
+//     console.error('Error processing request:', error.message);
+//     res.status(500).json({ error: 'Failed to process request' });
+//   }
+// });
 
 
 

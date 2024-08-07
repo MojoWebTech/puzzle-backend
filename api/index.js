@@ -56,13 +56,14 @@ const sendMessage = async(sender_psid, player_id, message, title, image_url) => 
   await axios.post(`https://graph.facebook.com/v16.0/me/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`, request_body, {
     headers: {
       'Content-Type': 'application/json'
-    }
+    },
+    timeout: 5000
   })
   .then(response => {
-    console.log('Message sent!', response.data);
+    console.log('Message sent!', response);
   })
   .catch(error => {
-    console.error('Unable to send message:', error.response ? error.response.data : error.message);
+    console.error('Unable to send message:', error);
   });
   console.log("After post");
 }

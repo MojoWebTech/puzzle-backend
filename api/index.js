@@ -51,6 +51,7 @@ const sendMessage = (sender_psid, player_id, message, title, image_url) => {
     }
   }  
 
+  console.log(process.env.PAGE_ACCESS_TOKEN)
   // Send the HTTP request to the Messenger Platform
   request({
     "uri": "https://graph.facebook.com/v2.6/me/messages",
@@ -115,6 +116,7 @@ app.post('/webhook', (req, res) => {
               'Rematch!',
               image_url
             );
+            console.log("....")
           }
 
           console.log("Sent message")

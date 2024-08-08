@@ -14,7 +14,7 @@ require('dotenv').config()
 
 
 const  app = express();
-app.use(cors({origin: "*",}));
+app.use(cors());
 app.use(express.json());
 app.use(body_parser.json()); 
 
@@ -232,6 +232,6 @@ mongoose.connect(process.env.MONGODB_URI,
 app.use('/api/categories', categoryRoutes);
 
 
+const PORT = process.env.PORT || 5000;
 
-app.listen(5000, () => console.log("Server ready on port 5000."));
-app.keepAliveTimeout = 61 * 1000;
+app.listen(PORT, () => console.log("Server ready on port ",PORT));

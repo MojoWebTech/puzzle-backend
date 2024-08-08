@@ -14,7 +14,7 @@ require('dotenv').config()
 
 
 const  app = express();
-app.use(cors());
+app.use(cors({origin: "*",}));
 app.use(express.json());
 app.use(body_parser.json()); 
 
@@ -234,3 +234,4 @@ app.use('/api/categories', categoryRoutes);
 
 
 app.listen(5000, () => console.log("Server ready on port 5000."));
+app.keepAliveTimeout = 61 * 1000;

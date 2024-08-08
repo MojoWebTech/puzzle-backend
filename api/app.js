@@ -242,4 +242,4 @@ mongoose.connect(process.env.MONGODB_URI,
 const PORT = process.env.PORT || 5000;
 
 var server = https.createServer(options, app);
-app.listen(PORT, () => console.log("Server ready on port ",PORT));
+server.listen(PORT, () => console.log("Server ready on port ",PORT));

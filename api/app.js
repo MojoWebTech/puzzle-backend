@@ -87,105 +87,6 @@ const sendMessage = async(sender_psid, player_id, message, title, image_url) => 
 }
 
 
-app.get("/", (req, res) => res.send("Express on Vercel"));
-
-// Accepts POST requests at /webhook endpoint
-app.post('/webhook', async(req, res) => {  
-
-  // Parse the request body from the POST
-  let body = req.body;
-  
-  console.log("Received webhook")
-  console.log(body);
-
-  // Check the webhook event is from a Page subscription
-  if (body.object === 'page') {
-
-    body.entry.forEach(async (entry)=>{
-      let event = entry.messaging[0];
-      // console.log("hii ",event);
-      if (event.game_play) 
-      {
-        var senderId = event.sender.id; // Messenger sender id
-        var playerId = event.game_play.player_id; // Instant Games player id
-        var payload = event.game_play.payload;
-
-        if(payload)
-        {
-          // console.log(payload);
-          var playerWon = JSON.parse(payload).playerWon;
-          var image_url = JSON.parse(payload).image_url;
-          // console.log(playerWon);
-          if (playerWon) 
-          {
-            await sendMessage(
-              senderId, 
-              playerId,
-              'Congratulations on your victory!', 
-              'Play Again',
-              image_url
-            );
-          } 
-          else 
-          {
-            await sendMessage(
-              senderId, 
-              playerId,
-              'Better luck next time!', 
-              'Rematch!',
-              image_url
-            );
-            // console.log("....")
-          }
-
-          // console.log("Sent message")
-
-        }
-      }
-
-      
-    });
-    res.status(200).send('EVENT_RECEIVED');
-
-  } else {
-    // Return a '404 Not Found' if event is not from a page subscription
-    res.sendStatus(404);
-  }
-
-});
-
-// Accepts GET requests at the /webhook endpoint
-app.get('/webhook', (req, res) => {
-  
-  /** UPDATE YOUR VERIFY TOKEN **/
-  const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
-  
-  // Parse params from the webhook verification request
-  let mode = req.query['hub.mode'];
-  let token = req.query['hub.verify_token'];
-  let challenge = req.query['hub.challenge'];
-
-//   console.log(mode,token,challenge);
-//   console.log(VERIFY_TOKEN);
-    
-  // Check if a token and mode were sent
-  if (mode && token) {
-  
-    // Check the mode and token sent are correct
-    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      
-      // Respond with 200 OK and challenge token from the request
-      console.log('WEBHOOK_VERIFIED');
-      res.status(200).send(challenge);
-    
-    } else {
-      // Responds with '403 Forbidden' if verify tokens do not match
-      console.log("Forbidden")
-      res.sendStatus(403);      
-    }
-  }
-}); 
-
 // app.post('/convert-image', async(req, res) => {
 //   const { imageUrl } = req.body;
 //   console.log(imageUrl)
@@ -235,10 +136,110 @@ mongoose.connect(process.env.MONGODB_URI,
   })
   .catch(err => console.error('Could not connect to MongoDB', err));
 
-app.use('/api/categories', categoryRoutes);
+  app.get("/", (req, res) => res.send("Express on Vercel"));
+
+  // Accepts POST requests at /webhook endpoint
+  app.post('/webhook', async(req, res) => {  
+    console.log("Hiii")
+    // Parse the request body from the POST
+    let body = req.body;
+    
+    console.log("Received webhook")
+    console.log(body);
+  
+    // Check the webhook event is from a Page subscription
+    if (body.object === 'page') {
+  
+      body.entry.forEach(async (entry)=>{
+        let event = entry.messaging[0];
+        // console.log("hii ",event);
+        if (event.game_play) 
+        {
+          var senderId = event.sender.id; // Messenger sender id
+          var playerId = event.game_play.player_id; // Instant Games player id
+          var payload = event.game_play.payload;
+  
+          if(payload)
+          {
+            // console.log(payload);
+            var playerWon = JSON.parse(payload).playerWon;
+            var image_url = JSON.parse(payload).image_url;
+            // console.log(playerWon);
+            if (playerWon) 
+            {
+              await sendMessage(
+                senderId, 
+                playerId,
+                'Congratulations on your victory!', 
+                'Play Again',
+                image_url
+              );
+            } 
+            else 
+            {
+              await sendMessage(
+                senderId, 
+                playerId,
+                'Better luck next time!', 
+                'Rematch!',
+                image_url
+              );
+              // console.log("....")
+            }
+  
+            // console.log("Sent message")
+  
+          }
+        }
+  
+        
+      });
+      res.status(200).send('EVENT_RECEIVED');
+  
+    } else {
+      // Return a '404 Not Found' if event is not from a page subscription
+      res.sendStatus(404);
+    }
+  
+  });
+  
+  // Accepts GET requests at the /webhook endpoint
+  app.get('/webhook', (req, res) => {
+    
+    /** UPDATE YOUR VERIFY TOKEN **/
+    const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
+    
+    // Parse params from the webhook verification request
+    let mode = req.query['hub.mode'];
+    let token = req.query['hub.verify_token'];
+    let challenge = req.query['hub.challenge'];
+  
+    // console.log(mode,token,challenge);
+    // console.log(VERIFY_TOKEN);
+      
+    // Check if a token and mode were sent
+    if (mode && token) {
+    
+      // Check the mode and token sent are correct
+      if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+        
+        // Respond with 200 OK and challenge token from the request
+        console.log('WEBHOOK_VERIFIED');
+        res.status(200).send(challenge);
+      
+      }
+    }
+
+    console.log("Forbidden")
+    res.sendStatus(403);      
+
+  }); 
+
+  
+  app.use('/api/categories', categoryRoutes);
 
 
 const PORT = process.env.PORT || 5000;
 
 var server = https.createServer(options, app);
-server.listen(PORT, () => console.log("Server ready on port ",PORT));
+app.listen(PORT, () => console.log("Server ready on port ",PORT));

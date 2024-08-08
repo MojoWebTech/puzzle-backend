@@ -1,5 +1,3 @@
-'use strict';
-
 const cors = require('cors');
 const request = require('request');
 const express = require('express');
@@ -8,17 +6,22 @@ const { Blob } = require('buffer');
 const https = require('https');
 // const fetch = require('node-fetch');
 const axios = require('axios');
-
+const categoryRoutes = require('./routes/categoryRoutes');
+const mongoose = require('mongoose');
 
 require('dotenv').config()
 
 
-const  app = express();
 
-// app.use(cors());
+const  app = express();
+app.use(cors());
 app.use(express.json());
 app.use(body_parser.json()); 
 
+
+
+const { processAndSaveCategories } = require('./data/utils');
+const { categorizedImages } = require('./data/uploadedData');
 
 const sendMessage = async(sender_psid, player_id, message, title, image_url) => {
 
@@ -166,7 +169,7 @@ app.get('/webhook', (req, res) => {
       res.sendStatus(403);      
     }
   }
-});
+}); 
 
 // app.post('/convert-image', async(req, res) => {
 //   const { imageUrl } = req.body;
@@ -206,6 +209,19 @@ app.get('/webhook', (req, res) => {
 //   }
 // });
 
+mongoose.connect(process.env.MONGODB_URI, 
+  { useNewUrlParser: true, useUnifiedTopology: true }
+)
+  .then(async() => {
+    console.log('Connected to MongoDB');
+    // await saveUploadedDataToMongoDB(uploadedData);
+    // console.log('Uploaded data saved to MongoDB.');
+    // processAndSaveCategories(categorizedImages);  
+  })
+  .catch(err => console.error('Could not connect to MongoDB', err));
+
+app.use('/api/categories', categoryRoutes);
 
 
-app.listen(3000, () => console.log("Server ready on port 3000."));
+
+app.listen(5000, () => console.log("Server ready on port 5000."));

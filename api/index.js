@@ -56,18 +56,27 @@ const sendMessage = async(sender_psid, player_id, message, title, image_url) => 
     }
   };
   console.log("Before post");
-  await axios.post(`https://graph.facebook.com/v16.0/me/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`, request_body, {
+  const response = await fetch(`https://graph.facebook.com/v16.0/me/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`, {
+    method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    timeout: 5000
-  })
-  .then(response => {
-    console.log('Message sent!', response);
-  })
-  .catch(error => {
-    console.error('Unable to send message:', error);
+    body: JSON.stringify(request_body),
   });
+
+  console.log(response);
+  // await axios.post(`https://graph.facebook.com/v16.0/me/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`, request_body, {
+  //   headers: {
+  //     'Content-Type': 'application/json'
+  //   },
+  //   timeout: 5000
+  // })
+  // .then(response => {
+  //   console.log('Message sent!', response);
+  // })
+  // .catch(error => {
+  //   console.error('Unable to send message:', error);
+  // });
   console.log("After post");
 }
 
@@ -75,7 +84,7 @@ const sendMessage = async(sender_psid, player_id, message, title, image_url) => 
 app.get("/", (req, res) => res.send("Express on Vercel"));
 
 // Accepts POST requests at /webhook endpoint
-app.post('/webhook', (req, res) => {  
+app.post('/webhook', async(req, res) => {  
 
   // Parse the request body from the POST
   let body = req.body;
@@ -86,7 +95,7 @@ app.post('/webhook', (req, res) => {
   // Check the webhook event is from a Page subscription
   if (body.object === 'page') {
 
-    body.entry.forEach((entry)=>{
+    body.entry.forEach(async (entry)=>{
       let event = entry.messaging[0];
       // console.log("hii ",event);
       if (event.game_play) 
@@ -103,7 +112,7 @@ app.post('/webhook', (req, res) => {
           // console.log(playerWon);
           if (playerWon) 
           {
-            sendMessage(
+            await sendMessage(
               senderId, 
               playerId,
               'Congratulations on your victory!', 
@@ -113,7 +122,7 @@ app.post('/webhook', (req, res) => {
           } 
           else 
           {
-            sendMessage(
+            await sendMessage(
               senderId, 
               playerId,
               'Better luck next time!', 

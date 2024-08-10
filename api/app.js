@@ -106,7 +106,7 @@ mongoose.connect(process.env.MONGODB_URI)
   })
   .catch(err => console.error('Could not connect to MongoDB', err));
 
-  app.get("/", (req, res) => res.send("Express on Vercel"));
+  app.get("/", (req, res) => res.send("Hello there!"));
 
   // Accepts POST requests at /webhook endpoint
   app.post('/webhook', async(req, res) => {  

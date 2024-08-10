@@ -204,6 +204,14 @@ const processAndSaveCategories = async () => {
 
     for (const categoryKey in categorizedImages) {
       if (categorizedImages.hasOwnProperty(categoryKey)) {
+
+        const existingCategory = await Category.findOne({ categoryKey });
+        
+        if (existingCategory && existingCategory.images.length>20) {
+          console.log("\nRepeat\n")
+          continue;
+        }
+
         const categoryData = categorizedImages[categoryKey];
         console.log(`Processing category: ${categoryKey}`);
 
@@ -241,8 +249,6 @@ const processAndSaveCategories = async () => {
         await new Promise(resolve => setTimeout(resolve, 5000));
 
         // Save to MongoDB
-        const existingCategory = await Category.findOne({ categoryKey });
-
         if (existingCategory) {
           // Append new images
           existingCategory.images.push(...processedImages);

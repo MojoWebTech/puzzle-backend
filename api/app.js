@@ -7,6 +7,10 @@ const axios = require('axios');
 const categoryRoutes = require('./routes/categoryRoutes');
 const mongoose = require('mongoose');
 
+const { processAndSaveCategories } = require('./data/utils');
+
+
+// To use https (self signed)
 const https = require('https');
 const fs = require('fs');
 
@@ -24,15 +28,10 @@ const app = express();
 
 
 app.use(express.static(path.join(__dirname, '../public')));
-
-
 app.use(cors());
 app.use(express.json());
 app.use(body_parser.json()); 
 
-
-
-const { processAndSaveCategories } = require('./data/utils');
 
 const sendMessage = async(sender_psid, player_id, message, title, image_url) => {
 
@@ -91,52 +90,9 @@ const sendMessage = async(sender_psid, player_id, message, title, image_url) => 
   console.log("After post");
 }
 
-
-// app.post('/convert-image', async(req, res) => {
-//   const { imageUrl } = req.body;
-//   console.log(imageUrl)
-
-//   if (!imageUrl) {
-//     return res.status(400).json({ error: 'Image URL is required' });
-//   }
-
-//   try {
-//     // Parse the URL
-//     const response = await fetch(imageUrl);
-//     // const blob = await response.blob();
-
-//     if (!response.ok) {
-//       throw new Error('Failed to fetch image');
-//     }
-
-//         // Convert the response to a Buffer
-//     const arrayBuffer = await response.arrayBuffer();
-//     const buffer = Buffer.from(arrayBuffer);
-
-//     // Set appropriate headers for sending the image
-//     res.setHeader('Content-Type', response.headers.get('content-type'));
-//     res.setHeader('Content-Disposition', 'inline; filename=image.jpg');
-
-//     // Send the Buffer back to the client
-//     res.send(buffer);
-
-    
-//       // console.log(blob);
-//       // res.send(blob);
-
-//   } catch (error) {
-//     console.error('Error processing request:', error.message);
-//     res.status(500).json({ error: 'Failed to process request' });
-//   }
-// });
-
-mongoose.connect(process.env.MONGODB_URI, 
-  { useNewUrlParser: true, useUnifiedTopology: true }
-)
+mongoose.connect(process.env.MONGODB_URI)
   .then(async() => {
     console.log('Connected to MongoDB');
-    // await saveUploadedDataToMongoDB(uploadedData);
-    // console.log('Uploaded data saved to MongoDB.');
     
     // Seed db
     // processAndSaveCategories();  
@@ -242,7 +198,6 @@ mongoose.connect(process.env.MONGODB_URI,
 
   }); 
 
-  
   app.use('/api/categories', categoryRoutes);
 
 

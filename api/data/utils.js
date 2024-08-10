@@ -4,6 +4,9 @@ const Category = require('../models/Category');
 const dotenv = require('dotenv');
 const { detectFacesInImageUrl } = require('./face-detect');
 const { categorizedData } = require('./uploadedData');
+const archiver = require('archiver');
+const fs = require('fs');
+const path = require('path');
 
 dotenv.config();
 
@@ -49,7 +52,7 @@ const fetchCategoryImages = async (id) => {
   let attempts = 0;
   const seenImageKeys = new Set();
 
-  while (allImages.length < 100 && attempts < 5) {
+  while (allImages.length < 100 && attempts < 6) {
       attempts++;
       const response = await fetch(`https://api.thebetter.ai/api/v1/theme/images?theme_id=${id}`, {
       method: 'GET',
@@ -135,7 +138,7 @@ const fetchHotNew = async (title) => {
       // Determine the new image ID based on the number of existing images
       let imageId = existingCategory ? existingCategory.images.length : 0;
 
-      const face_count = await detectFacesInImageUrl(uploadedImageUrl);
+      const face_count = item?.multi_face ? 2 : await detectFacesInImageUrl(uploadedImageUrl);
 
       const imageObject = {
         id: imageId, 
@@ -172,6 +175,32 @@ const fetchHotNew = async (title) => {
   }
 };
 
+async function createJsonZip(jsonData, jsonFileName = 'data.json', zipFileName = 'data.zip') {
+  return new Promise((resolve, reject) => {
+      const jsonFilePath = path.join(__dirname, jsonFileName);
+      fs.writeFileSync(jsonFilePath, JSON.stringify(jsonData, null, 2));
+      const zip = archiver('zip', {
+          zlib: { level: 9 }
+      });
+      const zipBuffers = [];
+      zip.on('data', (chunk) => {
+          zipBuffers.push(chunk);
+      });
+      zip.on('end', () => {
+          fs.unlinkSync(jsonFilePath);
+          resolve(Buffer.concat(zipBuffers));
+      });
+      zip.on('error', (err) => {
+          reject(err);
+      });
+      zip.file(jsonFilePath, { name: jsonFileName });
+      zip.finalize();
+  });
+}
+
+
+
+
 const processAndSaveCategories = async () => {
   try{
     const response = await fetch('https://api.thebetter.ai/api/v1/fb/themes/v2?page=2&version=1&lang=en', {
@@ -191,7 +220,7 @@ const processAndSaveCategories = async () => {
         images: [] 
       };
     });
-    
+
     for (const categoryKey in categorizedImages) {
       if (categorizedImages.hasOwnProperty(categoryKey)) {
         const categoryData = categorizedImages[categoryKey];
@@ -215,7 +244,7 @@ const processAndSaveCategories = async () => {
           const imageUploadResponse = await uploadToS3(imageName, imageBlob);
           const imageUrl = imageUploadResponse.Location;
           
-          let face_count = await detectFacesInImageUrl(imageUrl);
+          let face_count = image?.multi_face ? 2 : await detectFacesInImageUrl(imageUrl);
 
           processedImages.push({
             id: imageId++,
@@ -227,6 +256,8 @@ const processAndSaveCategories = async () => {
 
           console.log(`Image uploaded: ${imageName}, face_count: ${face_count}`);
         }
+
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
         // Save to MongoDB
         const existingCategory = await Category.findOne({ categoryKey });
@@ -254,6 +285,7 @@ const processAndSaveCategories = async () => {
         }
       }
     }
+
     console.log('All categories and images processed and saved to MongoDB successfully.');
     
     console.log("\n\nFetching hotnew");

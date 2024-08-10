@@ -2,6 +2,7 @@ const AWS = require('aws-sdk');
 const mongoose = require('mongoose');
 const Category = require('../models/Category');
 const dotenv = require('dotenv');
+const { detectFacesInImageUrl } = require('./face-detect');
 
 dotenv.config();
 
@@ -48,7 +49,7 @@ const fetchCategoryImages = async (id) => {
   let attempts = 0;
   const seenImageKeys = new Set();
 
-  while (allImages.length < 50 && attempts < 3) {
+  while (allImages.length < 100 && attempts < 5) {
       attempts++;
       const response = await fetch(`https://api.thebetter.ai/api/v1/theme/images?theme_id=${id}`, {
       method: 'GET',
@@ -72,6 +73,37 @@ const fetchCategoryImages = async (id) => {
   return allImages;
 };
 
+function extractThemeDetails(themeId) {
+
+  const upperCaseThemeId = themeId.toUpperCase();
+  const parts = upperCaseThemeId.split('_');
+  const filteredParts = parts.filter(part => !/^\d/.test(part));
+
+  let genders = [];
+
+  const remainingParts = filteredParts.filter(part => {
+    if (part === 'F' || part === 'FEMALE') {
+      genders.push('FEMALE');
+      return false;
+    }
+    if (part === 'M' || part === 'MALE') {
+      genders.push('MALE');
+      return false;
+    }
+    if (part === 'G') {
+      genders.push('FEMALE', 'MALE');
+      return false;
+    }
+    return true;
+  });
+  
+  const themeName = remainingParts.join(' ').trim();
+  return {
+    themeName,
+    genders: [...new Set(genders)] 
+  };
+}
+
 const fetchHotNew = async (title) => {
   try {
     const response = await fetch(`https://api.thebetter.ai/api/v1/home/images/${title}`, {
@@ -80,11 +112,7 @@ const fetchHotNew = async (title) => {
         'Content-Type': 'application/json',
       },
     });
-
-    // console.log(response);
-
     const data = await response.json();
-    // console.log(data);
     const hotNewData = data.data.list;
     const prefixUrl = data.data.prefix_url || '';
 
@@ -104,117 +132,133 @@ const fetchHotNew = async (title) => {
 
       // Fetch existing category from MongoDB
       let existingCategory = await Category.findOne({ categoryKey });
-
       // Determine the new image ID based on the number of existing images
       let imageId = existingCategory ? existingCategory.images.length : 0;
 
+      const face_count = await detectFacesInImageUrl(uploadedImageUrl);
+
       const imageObject = {
-        id: imageId, // Set the ID based on the number of images already in the category
+        id: imageId, 
         key: item.key,
         url: uploadedImageUrl,
-        tag: title, // Add the tag if available
-        theme_id: item.theme_id
+        tag: title, 
+        theme_id: item.theme_id,
+        face_count: face_count
       };
 
       if (existingCategory) {
-        // Add the new image to the existing category
         existingCategory.images.push(imageObject);
         await existingCategory.save();
-        console.log(`Added new hotnew image to existing category in MongoDB: ${categoryKey}`);
+        console.log(`Added new ${title} image to existing category in MongoDB: ${categoryKey}`);
       } else {
-        // Create a new category if it doesn't exist
+        const themedetails = extractThemeDetails(categoryKey);
+
         const newCategory = new Category({
-          themeName: categoryKey, // You can fetch the actual theme name if needed
-          coverImage: uploadedImageUrl, // Set the first image as cover if it's a new category
+          themeName: themedetails.themeName,
+          coverImage: uploadedImageUrl, 
           categoryKey: categoryKey,
-          gender: ["MALE", "FEMALE"], // Default genders, adjust based on actual data
+          gender: themedetails.genders, 
           images: [imageObject],
         });
 
         await newCategory.save();
-        console.log(`Created new category in MongoDB and added hotnew image: ${categoryKey}`);
+        console.log(`Created new category in MongoDB and added  ${title} image: ${categoryKey}`);
       }
     }
 
-    console.log('All hotnew images processed and saved to S3 and MongoDB successfully.');
+    console.log(`All  ${title} images processed and saved to S3 and MongoDB successfully.`);
   } catch (error) {
-    console.error('Error processing hotnew images:', error);
+    console.error(`Error processing  ${title} images:`, error);
   }
 };
 
-const processAndSaveCategories = async (categorizedImages) => {
+const processAndSaveCategories = async () => {
   try{
-    // for (const categoryKey in categorizedImages) {
-    //   if (categorizedImages.hasOwnProperty(categoryKey)) {
-    //     const categoryData = categorizedImages[categoryKey];
-    //     console.log(`Processing category: ${categoryKey}`);
+    const response = await fetch('https://api.thebetter.ai/api/v1/fb/themes/v2?page=2&version=1&lang=en', {
+      mode:'cors',
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    const responseData = await response.json(); 
+    let categorizedImages = {};
 
-    //     // Fetch the images for the category
-    //     const images = await fetchCategoryImages(categoryKey);
+    responseData?.data?.list.forEach(item => {
+      categorizedImages[item?.theme_id] = {
+        themeName: item?.name,
+        coverImage: item?.cover,
+        images: [] 
+      };
+    });
+    
+    for (const categoryKey in categorizedImages) {
+      if (categorizedImages.hasOwnProperty(categoryKey)) {
+        const categoryData = categorizedImages[categoryKey];
+        console.log(`Processing category: ${categoryKey}`);
 
-    //     // Upload the cover image to S3
-    //     const coverImageBlob = await fetchImageBlob(categoryData.coverImage);
-    //     const coverImageName = `${categoryKey}/cover`;
+        const images = await fetchCategoryImages(categoryKey);
 
-    //     const coverImageUploadResponse = await uploadToS3(coverImageName, coverImageBlob);
-    //     const coverImageUrl = coverImageUploadResponse.Location;
+        const coverImageBlob = await fetchImageBlob(categoryData.coverImage);
+        const coverImageName = `${categoryKey}/cover`;
+        const coverImageUploadResponse = await uploadToS3(coverImageName, coverImageBlob);
+        const coverImageUrl = coverImageUploadResponse.Location;
 
-    //     // Process and upload each image
-    //     let processedImages = [];
-    //     let imageId = 0;
+        let processedImages = [];
+        let imageId = 0;
 
-    //     for (const image of images) {
-    //       console.log(`Processing image: ${image.key}`);
+        for (const image of images) {
+          console.log(`Processing image: ${image.key}`);
 
-    //       const imageBlob = await fetchImageBlob(image.thn_url);
-    //       const imageName = image.key || `${categoryKey}/${image.key}`;
+          const imageBlob = await fetchImageBlob(image.thn_url);
+          const imageName = image.key || `${categoryKey}/${image.key}`;
+          const imageUploadResponse = await uploadToS3(imageName, imageBlob);
+          const imageUrl = imageUploadResponse.Location;
 
-    //       const imageUploadResponse = await uploadToS3(imageName, imageBlob);
-    //       const imageUrl = imageUploadResponse.Location;
+          const face_count = await detectFacesInImageUrl(imageUrl);
 
-    //       processedImages.push({
-    //         id: imageId++,
-    //         key: image.key,
-    //         url: imageUrl,
-    //         theme_id: image.theme_id
-    //       });
+          processedImages.push({
+            id: imageId++,
+            key: image.key,
+            url: imageUrl,
+            theme_id: image.theme_id,
+            face_count: face_count
+          });
 
-    //       console.log(`Image uploaded: ${imageName}`);
-    //     }
+          console.log(`Image uploaded: ${imageName}, face_count: ${face_count}`);
+        }
 
-    //     // Save to MongoDB
-    //     const existingCategory = await Category.findOne({ categoryKey });
+        // Save to MongoDB
+        const existingCategory = await Category.findOne({ categoryKey });
 
-    //     if (existingCategory) {
-    //       // Update existing category
-    //       existingCategory.themeName = categoryData.themeName;
-    //       existingCategory.coverImage = coverImageUrl;
-    //       existingCategory.gender = categoryData.gender || ["MALE", "FEMALE"];
+        if (existingCategory) {
+          // Append new images
+          existingCategory.images.push(...processedImages);
+          await existingCategory.save();
+          console.log(`Updated existing category in MongoDB: ${categoryKey}`);
+        } else {
+          // Create new category
+          const themedetails = extractThemeDetails(categoryKey);
 
-    //       // Append new images
-    //       existingCategory.images.push(...processedImages);
-    //       await existingCategory.save();
+          const newCategory = new Category({
+            themeName: categoryData.themeName,
+            coverImage: coverImageUrl,
+            categoryKey: categoryKey,
+            gender: themedetails.genders || ["MALE", "FEMALE"],
+            images: processedImages,
+          });
 
-    //       console.log(`Updated existing category in MongoDB: ${categoryKey}`);
-    //     } else {
-    //       // Create new category
-    //       const newCategory = new Category({
-    //         themeName: categoryData.themeName,
-    //         coverImage: coverImageUrl,
-    //         categoryKey: categoryKey,
-    //         gender: categoryData.gender || ["MALE", "FEMALE"],
-    //         images: processedImages,
-    //       });
+          await newCategory.save();
 
-    //       await newCategory.save();
-
-    //       console.log(`Created new category in MongoDB: ${categoryKey}`);
-    //     }
-    //   }
-    // }
-    // console.log('All categories and images processed and saved to MongoDB successfully.');
+          console.log(`Created new category in MongoDB: ${categoryKey}`);
+        }
+      }
+    }
+    console.log('All categories and images processed and saved to MongoDB successfully.');
+    
     console.log("\n\nFetching hotnew");
     await fetchHotNew('hotnew');
+
     console.log("\n\nFetching banner");
     await fetchHotNew('banner');
   

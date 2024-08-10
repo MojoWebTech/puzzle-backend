@@ -28,7 +28,14 @@ const app = express();
 
 
 app.use(express.static(path.join(__dirname, '../public')));
-app.use(cors());
+const corsOptions = {
+  origin: ["https://localhost:3000", "https://apps-787876049864708.apps.fbsbx.com"],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', 
+  credentials: true,
+  optionsSuccessStatus: 204 
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(body_parser.json()); 
 

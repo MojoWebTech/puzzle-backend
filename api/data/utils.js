@@ -52,7 +52,7 @@ const fetchCategoryImages = async (id) => {
   let attempts = 0;
   const seenImageKeys = new Set();
 
-  while (allImages.length < 100 && attempts < 6) {
+  while (allImages.length < 100 && attempts < 20) {
       attempts++;
       const response = await fetch(`https://api.thebetter.ai/api/v1/theme/images?theme_id=${id}`, {
       method: 'GET',
@@ -175,51 +175,32 @@ const fetchHotNew = async (title) => {
   }
 };
 
-async function createJsonZip(jsonData, jsonFileName = 'data.json', zipFileName = 'data.zip') {
-  return new Promise((resolve, reject) => {
-      const jsonFilePath = path.join(__dirname, jsonFileName);
-      fs.writeFileSync(jsonFilePath, JSON.stringify(jsonData, null, 2));
-      const zip = archiver('zip', {
-          zlib: { level: 9 }
-      });
-      const zipBuffers = [];
-      zip.on('data', (chunk) => {
-          zipBuffers.push(chunk);
-      });
-      zip.on('end', () => {
-          fs.unlinkSync(jsonFilePath);
-          resolve(Buffer.concat(zipBuffers));
-      });
-      zip.on('error', (err) => {
-          reject(err);
-      });
-      zip.file(jsonFilePath, { name: jsonFileName });
-      zip.finalize();
-  });
-}
-
-
-
-
 const processAndSaveCategories = async () => {
   try{
-    const response = await fetch('https://api.thebetter.ai/api/v1/fb/themes/v2?page=2&version=1&lang=en', {
-      mode:'cors',
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-    const responseData = await response.json(); 
     let categorizedImages = {...categorizedData};
 
-    responseData?.data?.list.forEach(item => {
-      categorizedImages[item?.theme_id] = {
-        themeName: item?.name,
-        coverImage: item?.cover,
-        images: [] 
-      };
-    });
+    let c=5;
+    while(c>0)
+    {
+      const response = await fetch('https://api.thebetter.ai/api/v1/fb/themes/v2?page=2&version=1&lang=en', {
+        mode:'cors',
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJQRS1KU1FMSkgiLCJhdWQiOiJhaS1qaWdzYXciLCJwcm92aWRlciI6InV1aWQiLCJpc3MiOiJhaS1qaWdzYXciLCJleHAiOjIwMzg2NTQ3OTMsImlhdCI6MTcyMzI5NDc5M30.OEeMdVD87ppXyX9yenopQ6GqMxYfVcaP_pEQH_wycmOxcB8VDql8w6LalZI87bg1d1rL2ss4Cvllysr38xcid_RVThilm9nKHwVnS1fce9FzZXlFyNIwtEysqNx7jK6vQubLqTi2TgacURHYvbn2VdP7EdLOzIMtJqAWbfRFoPs',
+          'x-app-id': 'ai-jigsaw'
+        }
+      });
+      const responseData = await response.json(); 
+      responseData?.data?.list.forEach(item => {
+        categorizedImages[item?.theme_id] = {
+          themeName: item?.name,
+          coverImage: item?.cover,
+          images: [] 
+        };
+      });
+      c--;  
+    }
 
     for (const categoryKey in categorizedImages) {
       if (categorizedImages.hasOwnProperty(categoryKey)) {

@@ -27518,7 +27518,7 @@
     }
   }
 
-  const categorizedImages = {
+  const categorizedData = {
     "casual_daily0_f_240709": {
         "themeName": "Daily plog",
         "coverImage": "https://dhg6tfla6xnxl.cloudfront.net/static/theme/casual_daily0_f_240709_fb.jpg",
@@ -27893,6 +27893,6 @@
 
   module.exports = {
     uploadedData,
-    categorizedImages
+    categorizedData
   };
   

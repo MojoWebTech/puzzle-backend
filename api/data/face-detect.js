@@ -1,26 +1,38 @@
-const fetch = require('node-fetch');
-const faceapi = require('@vladmandic/face-api');
+require('@tensorflow/tfjs-node');
 const canvas = require('canvas');
-const { Canvas, Image, ImageData } = canvas;
+const tf = require('@tensorflow/tfjs-node')
+const faceapi = require('@vladmandic/face-api');const path = require('path');
 
+// import face from '../../public/models' 
+
+const { Canvas, Image, ImageData } = canvas;
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
 
+
 async function loadModels() {
-  await faceapi.nets.ssdMobilenetv1.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/models');
+  const modelPath = path.join(__dirname, '../../public/models');
+  await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);
 }
 
 async function detectFacesInImageUrl(imageUrl) {
   try {
+    // const fetch = (await import('node-fetch')).default;
     await loadModels();
     const response = await fetch(imageUrl);
     if (!response.ok) {
       throw new Error(`Failed to fetch image from URL: ${response.statusText}`);
     }
-    const buffer = await response.buffer();
+
+    const blob = await response.blob();
+    const arrayBuffer = await blob.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
     const img = new Image();
     img.src = buffer;
-    const canvasImage = faceapi.createCanvasFromMedia(img);
-    const detections = await faceapi.detectAllFaces(canvasImage);
+
+    // const canvasImage = faceapi.createCanvasFromMedia(img);
+    const detections = await faceapi.detectAllFaces(img);
+    
     return detections.length;
 
   } catch (error) {

@@ -3,7 +3,6 @@ const request = require('request');
 const express = require('express');
 const  body_parser = require('body-parser');
 const { Blob } = require('buffer'); 
-// const fetch = require('node-fetch');
 const axios = require('axios');
 const categoryRoutes = require('./routes/categoryRoutes');
 const mongoose = require('mongoose');
@@ -19,7 +18,14 @@ require('dotenv').config()
 
 
 
-const  app = express();
+const path = require('path');
+
+const app = express();
+
+
+app.use(express.static(path.join(__dirname, '../public')));
+
+
 app.use(cors());
 app.use(express.json());
 app.use(body_parser.json()); 
@@ -27,7 +33,6 @@ app.use(body_parser.json());
 
 
 const { processAndSaveCategories } = require('./data/utils');
-const { categorizedImages } = require('./data/uploadedData');
 
 const sendMessage = async(sender_psid, player_id, message, title, image_url) => {
 
@@ -132,7 +137,9 @@ mongoose.connect(process.env.MONGODB_URI,
     console.log('Connected to MongoDB');
     // await saveUploadedDataToMongoDB(uploadedData);
     // console.log('Uploaded data saved to MongoDB.');
-    // processAndSaveCategories(categorizedImages);  
+    
+    // Seed db
+    // processAndSaveCategories();  
   })
   .catch(err => console.error('Could not connect to MongoDB', err));
 
@@ -241,5 +248,5 @@ mongoose.connect(process.env.MONGODB_URI,
 
 const PORT = process.env.PORT || 5000;
 
-var server = https.createServer(options, app);
-server.listen(PORT, () => console.log("Server ready on port ",PORT));
+// var server = https.createServer(options, app);
+app.listen(PORT, () => console.log("Server ready on port ",PORT));

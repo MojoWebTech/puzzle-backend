@@ -33,40 +33,46 @@ router.get('/clean', async (req, res) => {
 // GET to fetch all categories with 10 images from each category
 router.get('/', async (req, res) => {
   try {
-    // Fetch categories and select specific fields along with 10 images
-    const categories = await Category.find()
+    const { gender } = req.query; // Get the gender from the query parameters
+
+    if (!gender) {
+      return res.status(400).json({ error: 'Gender is required' });
+    }
+
+    // Fetch categories where the gender array includes the specified gender
+    const categories = await Category.find({ gender: { $in: [gender] } })
       .select('themeName coverImage categoryKey gender images')
       .slice('images', 1); // Limit images to 10 per category
 
-      // Fetch additional images with tag "hotnew"
-      const hotnew = await Category.aggregate([
-        { $unwind: "$images" },
-        { $match: { "images.tag": "hotnew" } },
-        { $group: { _id: "$categoryKey", images: { $push: "$images" } } },
-        { $limit: 10 } // Adjust the limit as needed
-      ]);
+    // Fetch additional images with tag "hotnew" and matching gender
+    const hotnew = await Category.aggregate([
+      { $unwind: "$images" },
+      { $match: { "images.tag": "hotnew", gender: { $in: [gender] } } },
+      { $group: { _id: "$categoryKey", images: { $push: "$images" } } },
+      { $limit: 10 } // Adjust the limit as needed
+    ]);
 
-      // Fetch additional images with tag "banner"
-      const banner = await Category.aggregate([
-        { $unwind: "$images" },
-        { $match: { "images.tag": "banner" } },
-        { $group: { _id: "$categoryKey", images: { $push: "$images" } } },
-        { $limit: 10 } // Adjust the limit as needed
-      ]);
+    // Fetch additional images with tag "banner" and matching gender
+    const banner = await Category.aggregate([
+      { $unwind: "$images" },
+      { $match: { "images.tag": "banner", gender: { $in: [gender] } } },
+      { $group: { _id: "$categoryKey", images: { $push: "$images" } } },
+      { $limit: 10 } // Adjust the limit as needed
+    ]);
 
-      // Construct the response object
-      const response = {
-        categories: categories, // Main categories with 10 images each
-        hotnew: hotnew,         // Images tagged as "hotnew"
-        banner: banner          // Images tagged as "banner"
-      };
+    // Construct the response object
+    const response = {
+      categories: categories, // Main categories with 10 images each
+      hotnew: hotnew,         // Images tagged as "hotnew"
+      banner: banner          // Images tagged as "banner"
+    };
 
-      res.status(200).json(response);
+    res.status(200).json(response);
 
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      res.status(500).json({ error: 'Failed to fetch categories.' });
-    }
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    res.status(500).json({ error: 'Failed to fetch categories.' });
+  }
 });
   
 // GET to fetch images of a specific category by key with pagination

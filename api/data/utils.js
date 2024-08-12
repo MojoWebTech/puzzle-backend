@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const mongoose = require('mongoose');
 const Category = require('../models/Category');
 const dotenv = require('dotenv');
-// const { detectFacesInImageUrl } = require('./face-detect');
+const { detectFacesInImageUrl } = require('./face-detect');
 const { categorizedData } = require('./uploadedData');
 const archiver = require('archiver');
 const fs = require('fs');
@@ -138,8 +138,8 @@ const fetchHotNew = async (title) => {
       // Determine the new image ID based on the number of existing images
       let imageId = existingCategory ? existingCategory.images.length : 0;
 
-      // const face_count = item?.multi_face ? 2 : await detectFacesInImageUrl(uploadedImageUrl);
-      const face_count = 1;
+      const face_count = item?.multi_face ? 2 : await detectFacesInImageUrl(uploadedImageUrl);
+
       const imageObject = {
         id: imageId, 
         key: item.key,
@@ -233,8 +233,7 @@ const processAndSaveCategories = async () => {
           const imageUploadResponse = await uploadToS3(imageName, imageBlob);
           const imageUrl = imageUploadResponse.Location;
           
-          // let face_count = image?.multi_face ? 2 : await detectFacesInImageUrl(imageUrl);
-          const face_count = 1;
+          let face_count = image?.multi_face ? 2 : await detectFacesInImageUrl(imageUrl);
 
           processedImages.push({
             id: imageId++,

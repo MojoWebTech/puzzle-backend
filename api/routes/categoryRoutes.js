@@ -2,43 +2,31 @@ const express = require('express');
 const Category = require('../models/Category');
 const router = express.Router();
 
-// POST to save category data
-router.post('/save', async (req, res) => {
-  const { categoryKey, themeName, coverImage, images, gender } = req.body;
-
+// GET to clean category data
+router.get('/clean', async (req, res) => {
   try {
-    let category = await Category.findOne({ categoryKey });
+    const categories = await Category.find().select('themeName coverImage categoryKey gender images');
 
-    if (category) {
-      // If the category already exists, update it
-      category.themeName = themeName;
-      category.coverImage = coverImage;
-      category.images = images.map(img => ({
-        id: img.id,
-        url: img.url,
-        key: img.key,
-      }));
-      category.gender = gender || ["MALE", "FEMALE"];
-    } else {
-      // Create a new category
-      category = new Category({
-        categoryKey,
-        themeName,
-        coverImage,
-        images: images.map(img => ({
-          id: img.id,
-          url: img.url,
-          key: img.key,
-        })),
-        gender: gender || ["MALE", "FEMALE"],
+    for (const category of categories) {
+      const seenUrls = new Set();
+      const uniqueImages = [];
+
+      category.images.forEach(image => {
+        if (!seenUrls.has(image.url)) {
+          seenUrls.add(image.url);
+          uniqueImages.push(image);
+        }
       });
+
+      // Update the category with the unique images
+      category.images = uniqueImages;
+      await category.save();
     }
 
-    await category.save();
-    res.status(200).json({ message: 'Category data saved successfully.' });
+    res.status(200).json({ message: 'Duplicate images removed successfully.' });
   } catch (error) {
-    console.error('Error saving category:', error);
-    res.status(500).json({ error: 'Failed to save category data.' });
+    console.error('Error cleaning categories:', error);
+    res.status(500).json({ error: 'Failed to clean categories.' });
   }
 });
 

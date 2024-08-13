@@ -1,6 +1,7 @@
 const express = require('express');
 const Category = require('../models/Category');
 const router = express.Router();
+require('dotenv').config()
 
 // GET to clean category data
 router.get('/clean', async (req, res) => {
@@ -33,12 +34,29 @@ router.get('/clean', async (req, res) => {
 // GET to fetch all categories with 10 images from each category
 router.get('/', async (req, res) => {
   try {
-    const { gender } = req.query; // Get the gender from the query parameters
-
-    if (!gender) {
-      return res.status(400).json({ error: 'Gender is required' });
+    const { name } = req.query;
+    if(!name)
+    {
+      return res.status(400).json({ error: 'Name is required' });
     }
 
+    const genderResponse = await fetch(`https://v2.namsor.com/NamSorAPIv2/api2/json/genderFull/${name}`, {
+      "method": "GET",
+      "headers": {
+        "X-API-KEY": process.env.GENDER_API_KEY,
+        "Accept": "application/json"
+      }
+    });
+    
+    if (!genderResponse.ok){
+      console.error("The request failed with status:", genderResponse.status, genderResponse);
+    }
+
+    const data = await genderResponse.json();
+    const gender = data?.likelyGender?.toUpperCase() || "MALE";
+
+    console.log(gender);
+      
     // Fetch categories where the gender array includes the specified gender
     const categories = await Category.find({ gender: { $in: [gender] } })
       .select('themeName coverImage categoryKey gender images')
@@ -74,7 +92,7 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch categories.' });
   }
 });
-  
+
 // GET to fetch images of a specific category by key with pagination
 router.get('/:categoryKey', async (req, res) => {
   const { categoryKey } = req.params;

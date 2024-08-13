@@ -79,7 +79,7 @@ router.get('/', (req, res) => {
     res.sendStatus(403);      
   }); 
 
-router.post('/webhook', async(req, res) => {  
+router.post('/', async(req, res) => {  
 
     let body = req.body;
     

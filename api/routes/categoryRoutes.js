@@ -58,16 +58,31 @@ router.get('/', async (req, res) => {
     console.log(gender);
       
     // Fetch categories where the gender array includes the specified gender
-    const categories = await Category.find({ gender: { $in: [gender] } })
+    const categories = await Category.find()
       .select('themeName coverImage categoryKey gender images')
-      .slice('images', 1); // Limit images to 10 per category
+      .slice('images', 1); // Limit images to 1 per category
+
+    // Sort categories based on whether the gender array includes the specified gender
+    categories.sort((a, b) => {
+      const aIncludesGender = a.gender.includes(gender);
+      const bIncludesGender = b.gender.includes(gender);
+
+      if (aIncludesGender && !bIncludesGender) {
+          return -1; // a comes before b
+      } else if (!aIncludesGender && bIncludesGender) {
+          return 1; // b comes before a
+      } else {
+          return 0; // keep original order
+      }
+    });
+    
 
     // Fetch additional images with tag "hotnew" and matching gender
     const hotnew = await Category.aggregate([
       { $unwind: "$images" },
       { $match: { "images.tag": "hotnew", gender: { $in: [gender] } } },
       { $group: { _id: "$categoryKey", images: { $push: "$images" } } },
-      { $limit: 10 } // Adjust the limit as needed
+      // { $limit: 10 } // Adjust the limit as needed
     ]);
 
     // Fetch additional images with tag "banner" and matching gender

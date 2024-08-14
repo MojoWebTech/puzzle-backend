@@ -7,10 +7,10 @@ const axios = require('axios');
 const categoryRoutes = require('./routes/categoryRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
 const formRoutes = require('./routes/form');
+const swapRoutes = require('./routes/swapRoutes');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const { processAndSaveCategories } = require('./data/utils');
-const {swapFace} = require('./data/api-calls');
 
 // To use https (self signed)
 const https = require('https');
@@ -49,14 +49,7 @@ app.use(body_parser.json());
   app.get("/", (req, res) => res.send("Hello there!"));
   app.use('/webhook', webhookRoutes);
   app.use('/api/categories', categoryRoutes);
-  app.post('/swap', async(req,res)=>{    
-    const {asid, image_url} = req.body;
-    const resultUrl = await swapFace(asid, image_url);
-    const response = {
-      resultUrl: resultUrl
-    };
-    res.status(200).json(response);
-  })
+  app.use('/swap', swapRoutes);
   app.use('/', formRoutes);
 
 

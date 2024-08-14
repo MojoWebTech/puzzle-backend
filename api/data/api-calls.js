@@ -307,24 +307,8 @@ const useFal = async(targetUrl, sourceUrl) => {
   return resultUrl;
 }
 
-const getUrl = async (asid) => {
-  const response = await fetch(`https://graph.fb.gg/v20.0/${asid}?fields=picture&access_token=${process.env.ACCESS_TOKEN}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    }
-  });
-
-  const data = await response.json();
-  return data?.picture?.data?.url || null;
-};
-
-const swapFace = async (asid, image_url) => {
-  const sourceUrl = await getUrl(asid);
-  // const sourceUrl = 'https://as1.ftcdn.net/v2/jpg/01/79/46/68/1000_F_179466839_nARiMdo6ocQWnw6X5YyecerwSYnAVb88.jpg';
-
-  if (!sourceUrl) return "error";
-  return await useFal(image_url, sourceUrl);
+const swapFace = async (profile_url, image_url) => {
+  return await useFal(image_url, profile_url);
 };
 
 module.exports = {

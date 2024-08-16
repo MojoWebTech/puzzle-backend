@@ -1,4 +1,5 @@
-const AWS = require('aws-sdk');
+const { Upload } = require('@aws-sdk/lib-storage');
+const { S3 } = require('@aws-sdk/client-s3');
 const mongoose = require('mongoose');
 const Category = require('../models/Category');
 const HotNew = require('../models/HotNew');
@@ -16,13 +17,13 @@ const REGION = process.env.REGION;
 const ACCESS_KEY = process.env.ACCESS_KEY;
 const SECRET_KEY = process.env.SECRET_KEY;
 
-AWS.config.update({
-  accessKeyId: ACCESS_KEY,
-  secretAccessKey: SECRET_KEY,
+const s3 = new S3({
+  credentials: {
+    accessKeyId: ACCESS_KEY,
+    secretAccessKey: SECRET_KEY,
+  },
   region: REGION,
 });
-
-const s3 = new AWS.S3();
 
 const uploadToS3 = async (fileName, fileContent) => {
   const params = {
@@ -32,13 +33,18 @@ const uploadToS3 = async (fileName, fileContent) => {
     ContentType: 'image/jpeg',
   };
 
-  const upload = s3.upload(params);
+  const upload = new Upload({
+    client: s3,
+    params,
+  });
 
   upload.on('httpUploadProgress', (progress) => {
     console.log(`Uploading ${fileName}: ${(progress.loaded / progress.total * 100).toFixed(2)}%`);
   });
 
-  return upload.promise();
+  return (
+    upload
+  );
 };
 
 const fetchImageBlob = async (url) => {
@@ -47,7 +53,7 @@ const fetchImageBlob = async (url) => {
     const arrayBuffer = await blob.arrayBuffer();
     return Buffer.from(arrayBuffer);
 };
-  
+
 const fetchCategoryImages = async (id) => {
   let allImages = [];
   let attempts = 0;
@@ -338,7 +344,26 @@ async function filterAndSaveHotNewImages() {
   }
 }
 
+async function updateImageGender() {
+  try {
+    const categories = await Category.find({});
+
+    for (const category of categories) {
+      for (const image of category.images) {
+        image.gender = category.gender;
+      }
+
+      await category.save();
+    }
+
+    console.log('Image genders updated successfully.');
+  } catch (error) {
+    console.error('Error updating image genders:', error);
+  }
+}
+
+
 module.exports = {
   processAndSaveCategories,
-  filterAndSaveHotNewImages,
+  updateImageGender,
 };

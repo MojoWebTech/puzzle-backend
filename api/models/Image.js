@@ -18,6 +18,10 @@ const imageSchema = new mongoose.Schema({
   swap_count: {
     type: Number,
     default: 0
+  },
+  gender: {
+    type: [String],
+    default: ["MALE", "FEMALE"],
   }
 });
 

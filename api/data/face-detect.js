@@ -1,3 +1,6 @@
+process.env.TF_CPP_MIN_LOG_LEVEL = '2';
+
+
 require('@tensorflow/tfjs-node');
 const canvas = require('canvas');
 const tf = require('@tensorflow/tfjs-node')

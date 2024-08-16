@@ -106,6 +106,8 @@ router.get('/:categoryKey', async (req, res) => {
   try {
     const category = await Category.findOne({ categoryKey });
 
+    console.log(categoryKey);
+    
     if (!category) {
       return res.status(404).json({ error: 'Category not found.' });
     }

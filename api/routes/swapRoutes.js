@@ -33,41 +33,39 @@ router.post('/', async(req, res) => {
         resultUrl: resultUrl
     };
 
-    if(resultUrl=="error")
+    if(resultUrl!="error")
     {
-        res.status(200).json(response);
+        let user = await User.findOne({ asid });
+        if (!user) 
+        {
+            user = new User({
+                name,
+                asid,
+                image_url: profile_url,
+                images: [{ ...image, swap_count: 1 }]
+            });
+        } else {
+            const existingImage = user.images.find(img => img.url === image_url);
+            if (existingImage) {
+                existingImage.swap_count += 1;
+            } else {
+                user.images.push({ ...image, swap_count: 1 });
+            }
+        }
+        await user.save();
+    
+        const category = await Category.findOne({ categoryKey: image.theme_id });
+        if (category) 
+        {
+            const categoryImage = category.images.find(img => img.key === image.key);
+            if (categoryImage) 
+            {
+                categoryImage.swap_count = (categoryImage.swap_count || 0) + 1;
+            }
+            await category.save();
+        }    
     }
     
-    let user = await User.findOne({ asid });
-    if (!user) 
-    {
-        user = new User({
-            name,
-            asid,
-            image_url: profile_url,
-            images: [{ ...image, swap_count: 1 }]
-        });
-    } else {
-        const existingImage = user.images.find(img => img.url === image_url);
-        if (existingImage) {
-            existingImage.swap_count += 1;
-        } else {
-            user.images.push({ ...image, swap_count: 1 });
-        }
-    }
-    await user.save();
-
-    const category = await Category.findOne({ categoryKey: image.theme_id });
-    if (category) 
-    {
-        const categoryImage = category.images.find(img => img.key === image.key);
-        if (categoryImage) 
-        {
-            categoryImage.swap_count = (categoryImage.swap_count || 0) + 1;
-        }
-        await category.save();
-    }
-
     res.status(200).json(response);
 });
 

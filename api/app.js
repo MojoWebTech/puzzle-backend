@@ -10,7 +10,7 @@ const formRoutes = require('./routes/form');
 const swapRoutes = require('./routes/swapRoutes');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
-const { processAndSaveCategories } = require('./data/utils');
+const { processAndSaveCategories, filterAndSaveHotNewImages } = require('./data/utils');
 
 // To use https (self signed)
 const https = require('https');
@@ -43,7 +43,8 @@ app.use(body_parser.json());
   .then(async() => {
     console.log('Connected to MongoDB');
     // Seed db
-    // processAndSaveCategories();  
+    // processAndSaveCategories(); 
+    // filterAndSaveHotNewImages(); 
   })
   .catch(err => console.error('Could not connect to MongoDB', err));
 

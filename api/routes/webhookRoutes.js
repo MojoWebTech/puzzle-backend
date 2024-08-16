@@ -45,7 +45,7 @@ const sendMessage = async (sender_psid, player_id, type, image_url) => {
     };
 
     console.log("Before post");
-    const response = await fetch(`https://graph.facebook.com/v16.0/me/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`, {
+    const response = await fetch(`https://graph.facebook.com/v20.0/me/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

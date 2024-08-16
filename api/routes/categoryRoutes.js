@@ -3,7 +3,6 @@ const Category = require('../models/Category');
 const router = express.Router();
 require('dotenv').config()
 
-// GET to clean category data
 router.get('/clean', async (req, res) => {
   try {
     const categories = await Category.find().select('themeName coverImage categoryKey gender images');
@@ -31,7 +30,6 @@ router.get('/clean', async (req, res) => {
   }
 });
 
-// GET to fetch all categories with 10 images from each category
 router.get('/', async (req, res) => {
   try {
     const { name } = req.query;
@@ -49,7 +47,7 @@ router.get('/', async (req, res) => {
     });
     
     if (!genderResponse.ok){
-      console.error("The request failed with status:", genderResponse.status, genderResponse);
+      console.error("Error in gender api response:", genderResponse.status, genderResponse);
     }
 
     const data = await genderResponse.json();
@@ -57,47 +55,39 @@ router.get('/', async (req, res) => {
 
     console.log(gender);
       
-    // Fetch categories where the gender array includes the specified gender
     const categories = await Category.find()
       .select('themeName coverImage categoryKey gender images')
-      .slice('images', 1); // Limit images to 1 per category
+      .slice('images', 1);
 
-    // Sort categories based on whether the gender array includes the specified gender
-    categories.sort((a, b) => {
-      const aIncludesGender = a.gender.includes(gender);
-      const bIncludesGender = b.gender.includes(gender);
+    const sameCategories = [];
+    const differentCategories = [];
 
-      if (aIncludesGender && !bIncludesGender) {
-          return -1; // a comes before b
-      } else if (!aIncludesGender && bIncludesGender) {
-          return 1; // b comes before a
-      } else {
-          return 0; // keep original order
+    categories.forEach(category => {
+      if (category.gender.includes(gender)) {
+        sameCategories.push(category);
+      } 
+      else {
+        differentCategories.push(category);
       }
     });
-    
 
-    // Fetch additional images with tag "hotnew" and matching gender
-    const hotnew = await Category.aggregate([
-      { $unwind: "$images" },
-      { $match: { "images.tag": "hotnew", gender: { $in: [gender] } } },
-      { $group: { _id: "$categoryKey", images: { $push: "$images" } } },
-      // { $limit: 10 } // Adjust the limit as needed
-    ]);
+    const sortedCategories = [...sameCategories, ...differentCategories];
+  
+    const hotnew = await HotNew.find({
+      tag: 'hotnew',
+      gender: { $in: [gender] },
+    });
 
-    // Fetch additional images with tag "banner" and matching gender
-    const banner = await Category.aggregate([
-      { $unwind: "$images" },
-      { $match: { "images.tag": "banner", gender: { $in: [gender] } } },
-      { $group: { _id: "$categoryKey", images: { $push: "$images" } } },
-      { $limit: 10 } // Adjust the limit as needed
-    ]);
+    const banner = await HotNew.find({
+      tag: 'banner',
+      gender: { $in: [gender] },
+    });
 
-    // Construct the response object
+
     const response = {
-      categories: categories, // Main categories with 10 images each
-      hotnew: hotnew,         // Images tagged as "hotnew"
-      banner: banner          // Images tagged as "banner"
+      categories: sortedCategories, 
+      hotnew: hotnew,
+      banner: banner
     };
 
     res.status(200).json(response);
@@ -108,20 +98,17 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET to fetch images of a specific category by key with pagination
 router.get('/:categoryKey', async (req, res) => {
   const { categoryKey } = req.params;
-  const { skip = 0, limit = 10 } = req.query; // Get skip and limit values from query params, default to skip 0 and limit 10
+  const { skip = 0, limit = 10 } = req.query; 
 
   try {
-    // Find the category by its key
     const category = await Category.findOne({ categoryKey });
 
     if (!category) {
       return res.status(404).json({ error: 'Category not found.' });
     }
 
-    // Apply skip and limit to the images array
     const images = category.images.slice(parseInt(skip), parseInt(skip) + parseInt(limit));
 
     res.status(200).json(images);

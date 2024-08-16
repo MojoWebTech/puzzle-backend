@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-// Define the image schema with an additional tag field
 const imageSchema = new mongoose.Schema({
   id: Number,
   url: String,
@@ -22,5 +21,4 @@ const imageSchema = new mongoose.Schema({
   }
 });
 
-// Export the image schema
 module.exports = imageSchema;

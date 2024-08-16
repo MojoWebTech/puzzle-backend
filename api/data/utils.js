@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 const mongoose = require('mongoose');
 const Category = require('../models/Category');
+const HotNew = require('../models/HotNew');
 const dotenv = require('dotenv');
 const { detectFacesInImageUrl } = require('./face-detect');
 const { categorizedData } = require('./uploadedData');
@@ -146,12 +147,16 @@ const fetchHotNew = async (title) => {
         url: uploadedImageUrl,
         tag: title, 
         theme_id: item.theme_id,
+        swap_count: 0,
         face_count: face_count
       };
+
+      let gender = '';
 
       if (existingCategory) {
         existingCategory.images.push(imageObject);
         await existingCategory.save();
+        gender = existingCategory.gender;
         console.log(`Added new ${title} image to existing category in MongoDB: ${categoryKey}, face_count: ${face_count}`);
       } else {
         const themedetails = extractThemeDetails(categoryKey);
@@ -163,10 +168,25 @@ const fetchHotNew = async (title) => {
           gender: themedetails.genders, 
           images: [imageObject],
         });
-
         await newCategory.save();
+
+        gender = themedetails.genders;
+
         console.log(`Created new category in MongoDB and added  ${title} image: ${categoryKey}, face_count: ${face_count}`);
       }
+      
+      const hotNewImage = new HotNew({
+        id: imageObject.id,
+        url: imageObject.url,
+        key: imageObject.key,
+        tag: imageObject.tag,
+        theme_id: imageObject.theme_id, 
+        face_count: imageObject.face_count,
+        swap_count: imageObject.swap_count || 0,
+        gender: gender || ["MALE", "FEMALE"],
+      });
+
+      await hotNewImage.save();
     }
 
     console.log(`All  ${title} images processed and saved to S3 and MongoDB successfully.`);
@@ -287,6 +307,38 @@ const processAndSaveCategories = async () => {
   }
 };
 
+
+
+async function filterAndSaveHotNewImages() {
+  try {
+    const categories = await Category.find({});
+
+    for (const category of categories) {
+      for (const image of category.images) {
+        if (image.tag === 'banner' || image.tag === 'hotnew') {
+
+          const hotNewImage = new HotNew({
+            id: image.id,
+            url: image.url,
+            key: image.key,
+            tag: image.tag,
+            theme_id: image.theme_id, 
+            face_count: image.face_count,
+            swap_count: image.swap_count || 0,
+            gender: category.gender || ["MALE", "FEMALE"],
+          });
+
+          await hotNewImage.save();
+        }
+      }
+    }
+    console.log('Filtered images have been saved to HotNew schema.');
+  } catch (error) {
+    console.error('Error filtering and saving images:', error);
+  }
+}
+
 module.exports = {
   processAndSaveCategories,
+  filterAndSaveHotNewImages,
 };

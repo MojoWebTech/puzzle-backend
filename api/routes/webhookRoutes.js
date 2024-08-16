@@ -5,7 +5,7 @@ const Notification = require('../models/Notification');  // Import the Notificat
 
 
 
-const sendMessage = async (sender_psid, player_id, type) => {
+const sendMessage = async (sender_psid, player_id, type, image_url) => {
   try {
     const notification = await Notification.findOne({ type });
     if (!notification) {
@@ -26,7 +26,7 @@ const sendMessage = async (sender_psid, player_id, type) => {
               {
                 "title": notification.title || "Default Title",
                 "subtitle": notification.subtitle || "Default Subtitle",
-                "image_url": notification.image_url || "https://default.image.url/placeholder.jpg", 
+                "image_url": image_url || notification.image_url, 
                 "buttons": [
                   {
                     "type": "game_play",
@@ -105,7 +105,8 @@ router.post('/', async(req, res) => {
               await sendMessage(
                 senderId, 
                 playerId,
-                'success'
+                'success',
+                image_url
               );
             } 
             else 
@@ -113,7 +114,8 @@ router.post('/', async(req, res) => {
               await sendMessage(
                 senderId, 
                 playerId,
-                'failure'
+                'failure',
+                image_url
               );
             }
           }

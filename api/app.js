@@ -27,7 +27,8 @@ const app = express();
 
 app.use(express.static(path.join(__dirname, '../public')));
 const corsOptions = {
-  origin: ["https://localhost:3000", "https://apps-787876049864708.apps.fbsbx.com"],
+  origin: ["https://localhost:3000", 
+            "https://apps-787876049864708.apps.fbsbx.com",],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', 
   credentials: true,
   optionsSuccessStatus: 204 

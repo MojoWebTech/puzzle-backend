@@ -44,7 +44,7 @@ const sendMessage = async (sender_psid, player_id, type, image_url) => {
       }
     };
 
-    console.log("Before post");
+    console.log("Before message");
     const response = await fetch(`https://graph.facebook.com/v20.0/me/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`, {
       method: 'POST',
       headers: {
@@ -53,8 +53,8 @@ const sendMessage = async (sender_psid, player_id, type, image_url) => {
       body: JSON.stringify(request_body),
     });
 
-    console.log(response);
-    console.log("After post");
+    // console.log(response);
+    console.log("After message");
   } catch (error) {
     console.error('Error sending message:', error);
   }
@@ -84,7 +84,7 @@ router.post('/', async(req, res) => {
     let body = req.body;
     
     console.log("Received webhook")
-    console.log(body);
+    // console.log(body);
   
     if (body.object === 'page') {
       body.entry.forEach(async (entry)=>{

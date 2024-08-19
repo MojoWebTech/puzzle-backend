@@ -104,17 +104,18 @@ router.get('/:categoryKey', async (req, res) => {
   const { skip = 0, limit = 10 } = req.query; 
 
   try {
-    const category = await Category.findOne({ categoryKey });
+    const category = await Category.findOne({ categoryKey })
+      .select({ images: { $slice: [parseInt(skip), parseInt(limit)] } })
+      .lean();
 
-    console.log(categoryKey);
-    
-    if (!category) {
-      return res.status(404).json({ error: 'Category not found.' });
+    if (!category || category.images.length === 0) {
+      return res.status(404).json({ error: 'Category not found or no images available.' });
     }
 
-    const images = category.images.slice(parseInt(skip), parseInt(skip) + parseInt(limit));
+    const images = category.images;
 
     res.status(200).json(images);
+
   } catch (error) {
     console.error('Error fetching category images:', error);
     res.status(500).json({ error: 'Failed to fetch category images.' });

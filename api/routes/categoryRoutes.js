@@ -57,7 +57,7 @@ router.get('/', async (req, res) => {
     console.log(gender);
       
     const categories = await Category.find()
-    .select({ themeName: 1, coverImage: 1, categoryKey: 1, gender: 1, images: { $slice: 1 } })
+    .select({ themeName: 1, coverImage: 1, categoryKey: 1, gender: 1, images: { $slice: 10 } })
     .lean();
   
     const sameCategories = [];

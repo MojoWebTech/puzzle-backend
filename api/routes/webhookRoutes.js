@@ -26,7 +26,7 @@ const sendMessage = async (sender_psid, player_id, type, image_url) => {
               {
                 "title": notification.title || "Default Title",
                 "subtitle": notification.subtitle || "Default Subtitle",
-                "image_url": image_url || notification.image_url, 
+                "image_url": notification.image_url=="default" ? image_url : notification.image_url, 
                 "buttons": [
                   {
                     "type": "game_play",

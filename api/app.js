@@ -12,6 +12,7 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const { processAndSaveCategories, updateImageGender } = require('./data/utils');
 
+
 // To use https (self signed)
 const https = require('https');
 const fs = require('fs');
@@ -27,8 +28,11 @@ const app = express();
 
 app.use(express.static(path.join(__dirname, '../public')));
 const corsOptions = {
-  origin: ["https://localhost:3000", 
-            "https://apps-787876049864708.apps.fbsbx.com",],
+  origin: [
+    "https://localhost:3000", 
+    "https://apps-787876049864708.apps.fbsbx.com",
+    "https://instamojopuzzle-d3bzgtaud7g2eufz.westindia-01.azurewebsites.net" 
+  ],
 };
 
 app.use(cors(corsOptions));
@@ -45,7 +49,7 @@ app.use(body_parser.json());
   })
   .catch(err => console.error('Could not connect to MongoDB', err));
 
-  app.get("/", (req, res) => res.send("Hello there!"));
+  app.get("/", (res, res) => res.send("Hello there!"));
   app.use('/webhook', webhookRoutes);
   app.use('/api/categories', categoryRoutes);
   app.use('/swap', swapRoutes);
@@ -53,6 +57,6 @@ app.use(body_parser.json());
 
 
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => console.log("Server ready on port ",PORT));

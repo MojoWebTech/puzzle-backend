@@ -38,6 +38,10 @@ router.get('/', async (req, res) => {
     {
       return res.status(400).json({ error: 'Name is required' });
     }
+    else{
+      console.log(name);
+    }
+
 
     const genderResponse = await fetch(`https://v2.namsor.com/NamSorAPIv2/api2/json/genderFull/${name}`, {
       "method": "GET",
@@ -49,14 +53,14 @@ router.get('/', async (req, res) => {
     
     if (!genderResponse.ok){
       console.error("Error in gender api response:", genderResponse.status, genderResponse);
+      return res.status(genderResponse.status).json({ message: `failed to fetch`});
     }
 
     const data = await genderResponse.json();
     const gender = data?.likelyGender?.toUpperCase() || "MALE";
-
-    console.log(gender);
       
     const categories = await Category.find()
+    //redis ==
     .select({ themeName: 1, coverImage: 1, categoryKey: 1, gender: 1, images: { $slice: 10 } })
     .lean();
   
@@ -88,7 +92,8 @@ router.get('/', async (req, res) => {
     const response = {
       categories: sortedCategories, 
       hotnew: hotnew,
-      banner: banner
+      banner: banner,
+      gender: gender
     };
 
     res.status(200).json(response);

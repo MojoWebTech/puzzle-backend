@@ -1,9 +1,11 @@
 process.env.TF_CPP_MIN_LOG_LEVEL = '2';
 
 
-require('@tensorflow/tfjs-node');
+// require('@tensorflow/tfjs-node');
+require('@tensorflow/tfjs');
 const canvas = require('canvas');
-const tf = require('@tensorflow/tfjs-node')
+// const tf = require('@tensorflow/tfjs-node')
+const tf = require('@tensorflow/tfjs');
 const faceapi = require('@vladmandic/face-api');const path = require('path');
 
 // import face from '../../public/models' 

@@ -57,6 +57,6 @@ app.use(body_parser.json());
 
 
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 8080; // azure port
 
 app.listen(PORT, () => console.log("Server ready on port ",PORT));

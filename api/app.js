@@ -49,7 +49,7 @@ app.use(body_parser.json());
   })
   .catch(err => console.error('Could not connect to MongoDB', err));
 
-  app.get("/", (res, res) => res.send("Hello there!"));
+  app.get("/", (req, res) => res.send("Hello there!"));
   app.use('/webhook', webhookRoutes);
   app.use('/api/categories', categoryRoutes);
   app.use('/swap', swapRoutes);

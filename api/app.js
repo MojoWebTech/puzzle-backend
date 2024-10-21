@@ -33,7 +33,7 @@ app.use(express.json());
 app.use(body_parser.json()); 
 
 const URI = process.env.MONGODB_URI;
-  mongoose.connect(URI || '', { useNewUrlParser: true, useUnifiedTopology: true })
+  mongoose.connect(URI || '', {serverSelectionTimeoutMS: 10000})
   .then(async() => {
     console.log('Connected to MongoDB');
     // Seed db

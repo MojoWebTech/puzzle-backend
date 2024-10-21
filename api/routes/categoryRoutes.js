@@ -2,7 +2,7 @@ const express = require('express');
 const Category = require('../models/Category');
 const HotNew = require('../models/HotNew');
 const router = express.Router();
-require('dotenv').config()
+require('dotenv').config();
 
 router.get('/clean', async (req, res) => {
   try {
@@ -42,15 +42,14 @@ router.get('/', async (req, res) => {
       console.log(name);
     }
 
-
     const genderResponse = await fetch(`https://v2.namsor.com/NamSorAPIv2/api2/json/genderFull/${name}`, {
       "method": "GET",
       "headers": {
-        "X-API-KEY": process.env.GENDER_API_KEY,
+        "X-API-KEY": process.env.GENDER_API_KEY || "ba51cef71faebe6c4d1fd7e115158541",
         "Accept": "application/json"
       }
     });
-    
+
     if (!genderResponse.ok){
       console.error("Error in gender api response:", genderResponse.status, genderResponse);
       return res.status(genderResponse.status).json({ message: `failed to fetch`});

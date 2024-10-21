@@ -13,9 +13,6 @@ const jwt = require('jsonwebtoken');
 const { processAndSaveCategories, updateImageGender } = require('./data/utils');
 
 
-
-
-
 require('dotenv').config()
 
 const path = require('path');
@@ -35,8 +32,8 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(body_parser.json()); 
 
-
-  mongoose.connect(process.env.MONGODB_URI)
+const URI = process.env.MONGODB_URI;
+  mongoose.connect(URI || '', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(async() => {
     console.log('Connected to MongoDB');
     // Seed db

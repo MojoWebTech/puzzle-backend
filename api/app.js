@@ -13,14 +13,9 @@ const jwt = require('jsonwebtoken');
 const { processAndSaveCategories, updateImageGender } = require('./data/utils');
 
 
-// To use https (self signed)
-const https = require('https');
-const fs = require('fs');
 
-const options = {
-  key: fs.readFileSync('key.pem'),
-  cert: fs.readFileSync('cert.pem'),
-}
+
+
 require('dotenv').config()
 
 const path = require('path');
@@ -29,6 +24,7 @@ const app = express();
 app.use(express.static(path.join(__dirname, '../public')));
 const corsOptions = {
   origin: [
+    "http://localhost:3000", 
     "https://localhost:3000", 
     "https://apps-787876049864708.apps.fbsbx.com",
     "https://instamojopuzzle-d3bzgtaud7g2eufz.westindia-01.azurewebsites.net" 

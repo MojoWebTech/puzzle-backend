@@ -15,8 +15,6 @@
     "@aws-sdk/credential-providers": "^3.632.0",
     "@aws-sdk/lib-storage": "^3.632.0",
     "@fal-ai/serverless-client": "^0.14.2",
-    "@tensorflow/tfjs": "^4.21.0",
-    "@vladmandic/face-api": "^1.7.13",
     "archiver": "^7.0.1",
     "axios": "^1.7.3",
     "body-parser": "^1.20.2",

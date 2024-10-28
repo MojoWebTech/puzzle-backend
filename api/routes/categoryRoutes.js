@@ -12,7 +12,7 @@ router.get('/clean', async (req, res) => {
       const seenUrls = new Set();
       const uniqueImages = [];
 
-      category.images.forEach(image => {
+      category.images.map(image => {
         if (!seenUrls.has(image.url)) {
           seenUrls.add(image.url);
           uniqueImages.push(image);
@@ -38,9 +38,8 @@ router.get('/', async (req, res) => {
     {
       return res.status(400).json({ error: 'Name is required' });
     }
-    else{
-      console.log(name);
-    }
+    
+    console.log(name);
 
     const genderResponse = await fetch(`https://v2.namsor.com/NamSorAPIv2/api2/json/genderFull/${name}`, {
       "method": "GET",
@@ -52,7 +51,7 @@ router.get('/', async (req, res) => {
     //key fixed using env azure 
     if (!genderResponse.ok){
       console.error("Error in gender api response:", genderResponse.status, genderResponse);
-      return res.status(genderResponse.status).json({ message: `failed to fetch`});
+      return res.status(genderResponse.status).json({ message: "failed to fetch"});
     }
 
     const data = await genderResponse.json();
@@ -66,7 +65,7 @@ router.get('/', async (req, res) => {
     const sameCategories = [];
     const differentCategories = [];
 
-    categories.forEach(category => {
+    categories.map(category => {
       if (category.gender.includes(gender)) {
         sameCategories.push(category);
       } 
@@ -109,7 +108,7 @@ router.get('/:categoryKey', async (req, res) => {
 
   try {
     const category = await Category.findOne({ categoryKey })
-      .select({ images: { $slice: [parseInt(skip), parseInt(limit)] } })
+      .select({ images: { $slice: [Number.parseInt(skip), Number.parseInt(limit)] } })
       .lean();
 
     if (!category || category.images.length === 0) {

@@ -3,10 +3,8 @@ const router = express.Router();
 const Notification = require('../models/Notification');
 const dotenv = require('dotenv');
 
-// Load environment variables
 dotenv.config();
 
-// Route to display the form
 router.get('/form', async (req, res) => {
     try {
       res.send(`
@@ -165,7 +163,7 @@ router.post('/submit-form', express.urlencoded({ extended: true }), async (req, 
       return res.status(403).send('Invalid secret key.');
     }
 
-    let updateData = {};
+    const updateData = {};
     if (title) updateData.title = title;
     if (subtitle) updateData.subtitle = subtitle;
     if (image_url_hidden) updateData.image_url = image_url_hidden;

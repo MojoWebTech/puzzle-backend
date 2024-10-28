@@ -13,7 +13,7 @@ const sendMessage = async (sender_psid, player_id, type, image_url) => {
       return;
     }
 
-    let request_body = {
+    const request_body = {
       "recipient": {
         "id": sender_psid
       },
@@ -26,7 +26,7 @@ const sendMessage = async (sender_psid, player_id, type, image_url) => {
               {
                 "title": notification.title || "Default Title",
                 "subtitle": notification.subtitle || "Default Subtitle",
-                "image_url": notification.image_url=="default" ? image_url : notification.image_url, 
+                "image_url": notification.image_url==="default" ? image_url : notification.image_url, 
                 "buttons": [
                   {
                     "type": "game_play",
@@ -64,9 +64,9 @@ const sendMessage = async (sender_psid, player_id, type, image_url) => {
 router.get('/', (req, res) => {
     const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
     
-    let mode = req.query['hub.mode'];
-    let token = req.query['hub.verify_token'];
-    let challenge = req.query['hub.challenge'];
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
 
     if (mode && token) {
         if (mode === 'subscribe' && token === VERIFY_TOKEN) {
@@ -81,24 +81,24 @@ router.get('/', (req, res) => {
 
 router.post('/', async(req, res) => {  
 
-    let body = req.body;
+    const body = req.body;
     
     console.log("Received webhook")
     // console.log(body);
   
     if (body.object === 'page') {
-      body.entry.forEach(async (entry)=>{
-        let event = entry.messaging[0];
+      body.entry.map(async (entry)=>{
+        const event = entry.messaging[0];
         if (event.game_play) 
         {
-          var senderId = event.sender.id; 
-          var playerId = event.game_play.player_id;
-          var payload = event.game_play.payload;
+          const senderId = event.sender.id; 
+          const playerId = event.game_play.player_id;
+          const payload = event.game_play.payload;
   
           if(payload)
           {
-            var playerWon = JSON.parse(payload).playerWon;
-            var image_url = JSON.parse(payload).image_url;
+            const playerWon = JSON.parse(payload).playerWon;
+            const image_url = JSON.parse(payload).image_url;
 
             if (playerWon) 
             {

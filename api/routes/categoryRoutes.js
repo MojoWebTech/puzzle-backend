@@ -33,29 +33,32 @@ router.get('/clean', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const { name } = req.query;
+    let { name, gender } = req.query;
     if(!name)
     {
       return res.status(400).json({ error: 'Name is required' });
     }
     
-    console.log(name);
+    console.log("name----> ", name);
 
-    const genderResponse = await fetch(`https://v2.namsor.com/NamSorAPIv2/api2/json/genderFull/${name}`, {
-      "method": "GET",
-      "headers": {
-        "X-API-KEY": process.env.GENDER_API_KEY,
-        "Accept": "application/json"
+    if(!gender) {
+      const genderResponse = await fetch(`https://v2.namsor.com/NamSorAPIv2/api2/json/genderFull/${name}`, {
+        "method": "GET",
+        "headers": {
+          "X-API-KEY": process.env.GENDER_API_KEY,
+          "Accept": "application/json"
+        }
+      });
+
+      if (!genderResponse.ok){
+        console.error("Error in gender api response:", genderResponse.status, genderResponse);
+        return res.status(genderResponse.status).json({ message: "failed to fetch"});
       }
-    });
-    //key fixed using env azure 
-    if (!genderResponse.ok){
-      console.error("Error in gender api response:", genderResponse.status, genderResponse);
-      return res.status(genderResponse.status).json({ message: "failed to fetch"});
+
+      const data = await genderResponse.json();
+      gender = data?.likelyGender?.toUpperCase() || "MALE";
     }
 
-    const data = await genderResponse.json();
-    const gender = data?.likelyGender?.toUpperCase() || "MALE";
       
     const categories = await Category.find()
     //redis ==

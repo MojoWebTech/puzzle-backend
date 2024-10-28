@@ -42,7 +42,7 @@ router.post('/', async(req, res) => {
 
     console.log("resultUrl --->", resultUrl);
 
-    if(resultUrl!="error")
+    if(resultUrl!=="error")
     {
         let user = await User.findOne({ asid });
         if (!user) 

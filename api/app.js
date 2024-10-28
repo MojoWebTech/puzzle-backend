@@ -1,21 +1,17 @@
 const cors = require('cors');
-const request = require('request');
 const express = require('express');
 const  body_parser = require('body-parser');
-const { Blob } = require('buffer'); 
-const axios = require('axios');
 const categoryRoutes = require('./routes/categoryRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
 const formRoutes = require('./routes/form');
 const swapRoutes = require('./routes/swapRoutes');
 const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
 const { processAndSaveCategories, updateImageGender } = require('./data/utils');
 
 
 require('dotenv').config()
 
-const path = require('path');
+const path = require('node:path');
 const app = express();
 
 app.use(express.static(path.join(__dirname, '../public')));

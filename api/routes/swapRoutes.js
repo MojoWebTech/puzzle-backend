@@ -25,13 +25,22 @@ router.post('/', async(req, res) => {
     const {asid, image} = req.body;
     const image_url = image?.url;
 
-    const {name, profile_url} = await getDetails(asid);  
+    console.log("asid --->", asid);
+    console.log("image_url --->", image_url);
+
+    const {name, profile_url} = await getDetails(asid); 
+        
+    console.log("name --->", name);
+    console.log("profile_url --->", profile_url);
+    
     if (!profile_url) return "error";
   
     const resultUrl = await swapFace(profile_url, image_url);
     const response = {
         resultUrl: resultUrl
     };
+
+    console.log("resultUrl --->", resultUrl);
 
     if(resultUrl!="error")
     {

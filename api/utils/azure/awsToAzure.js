@@ -3,11 +3,10 @@ const axios = require("axios");
 const dotenv = require('dotenv');
 const Category = require("../../models/Category");
 const HotNew = require("../../models/HotNew");
-const path = require('node:path');
+const { AZURE_BLOB_URL } = require("../../config/utils");
 dotenv.config();
 
 const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING);
-const AZURE_BLOB_URL = process.env.AZURE_BLOB_URL;
 
 async function getOrCreateContainer(containerName) {
     const containerClient = blobServiceClient.getContainerClient(containerName);

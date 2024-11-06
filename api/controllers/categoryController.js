@@ -1,10 +1,11 @@
 
+const { GENDER_API_URL } = require('../config/utils');
 const Category = require('../models/Category');
 const fetch = require('node-fetch');
 
 
 const getGender = async (name) => {
-  const response = await fetch(`${process.env.GENDER_API_URL}/${name}`, {
+  const response = await fetch(`${GENDER_API_URL}/${name}`, {
     method: "GET",
     headers: {
       "X-API-KEY": process.env.GENDER_API_KEY,

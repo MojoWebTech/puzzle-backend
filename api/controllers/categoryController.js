@@ -41,7 +41,7 @@ const cleanCategories = async (req, res) => {
 };
 
 
-const getCategories = async (req, res) => {
+const getFirstData = async (req, res) => {
   let { name, gender } = req.query;
 
   if (!name) {
@@ -74,7 +74,23 @@ const getCategories = async (req, res) => {
 
   const sortedCategories = [...sameCategories, ...differentCategories];
 
-  res.status(200).json({ categories: sortedCategories, gender });
+  const hotnew = await HotNew.find({
+    tag: 'hotnew',
+    gender: { $in: [gender] },
+  });
+
+  const banner = await HotNew.find({
+    tag: 'banner',
+    gender: { $in: [gender] },
+  });
+
+
+  res.status(200).json({
+    categories: sortedCategories, 
+    hotnew: hotnew,
+    banner: banner,
+    gender: gender
+  });
 };
 
 
@@ -98,6 +114,6 @@ const getCategoryImages = async (req, res) => {
 
 module.exports = { 
     cleanCategories, 
-    getCategories, 
+    getFirstData, 
     getCategoryImages 
 };

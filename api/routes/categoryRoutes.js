@@ -1,11 +1,11 @@
 
 const express = require('express');
 const router = express.Router();
-const { cleanCategories, getCategories, getCategoryImages } = require('../controllers/categoryController');
+const { cleanCategories, getFirstData, getCategoryImages } = require('../controllers/categoryController');
 
 
 router.get('/clean', cleanCategories);
-router.get('/', getCategories);
+router.get('/', getFirstData);
 router.get('/:categoryKey', getCategoryImages);
 
 

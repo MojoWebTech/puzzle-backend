@@ -1,14 +1,10 @@
 const { Upload } = require('@aws-sdk/lib-storage');
 const { S3 } = require('@aws-sdk/client-s3');
-const mongoose = require('mongoose');
-const Category = require('../models/Category');
-const HotNew = require('../models/HotNew');
+const Category = require('../../models/Category');
+const HotNew = require('../../models/HotNew');
 const dotenv = require('dotenv');
-const { detectFacesInImageUrl } = require('./face-detect');
-const { categorizedData } = require('./uploadedData');
-const archiver = require('archiver');
-const fs = require('fs');
-const path = require('path');
+const { detectFacesInImageUrl } = require('../face-detect/faceDetect');
+const { categorizedData } = require('../dummyData');
 
 dotenv.config();
 
@@ -55,7 +51,7 @@ const fetchImageBlob = async (url) => {
 };
 
 const fetchCategoryImages = async (id) => {
-  let allImages = [];
+  const allImages = [];
   let attempts = 0;
   const seenImageKeys = new Set();
 
@@ -71,7 +67,7 @@ const fetchCategoryImages = async (id) => {
       const images = data?.data;
 
       if (images) {
-      images.forEach((image) => {
+      images.map((image) => {
           if (!seenImageKeys.has(image.key)) {
           seenImageKeys.add(image.key); // Add key to the set
           allImages.push(image); // Add unique images to the array
@@ -89,7 +85,7 @@ const extractThemeDetails = (themeId) => {
   const parts = upperCaseThemeId.split('_');
   const filteredParts = parts.filter(part => !/^\d/.test(part));
 
-  let genders = [];
+  const genders = [];
 
   const remainingParts = filteredParts.filter(part => {
     if (part === 'F' || part === 'FEMALE') {
@@ -141,9 +137,9 @@ const fetchHotNew = async (title) => {
       const uploadedImageUrl = imageUploadResponse.Location;
 
       // Fetch existing category from MongoDB
-      let existingCategory = await Category.findOne({ categoryKey });
+      const existingCategory = await Category.findOne({ categoryKey });
       // Determine the new image ID based on the number of existing images
-      let imageId = existingCategory ? existingCategory.images.length : 0;
+      const imageId = existingCategory ? existingCategory.images.length : 0;
 
       const face_count = item?.multi_face ? 2 : await detectFacesInImageUrl(uploadedImageUrl);
 
@@ -203,7 +199,7 @@ const fetchHotNew = async (title) => {
 
 const processAndSaveCategories = async () => {
   try{
-    let categorizedImages = {...categorizedData};
+    const categorizedImages = {...categorizedData};
 
     let c=5;
     while(c>0)
@@ -218,7 +214,7 @@ const processAndSaveCategories = async () => {
         }
       });
       const responseData = await response.json(); 
-      responseData?.data?.list.forEach(item => {
+      responseData?.data?.list.map((item) => {
         categorizedImages[item?.theme_id] = {
           themeName: item?.name,
           coverImage: item?.cover,
@@ -229,6 +225,7 @@ const processAndSaveCategories = async () => {
     }
 
     for (const categoryKey in categorizedImages) {
+      // biome-ignore lint/suspicious/noPrototypeBuiltins: <explanation>
       if (categorizedImages.hasOwnProperty(categoryKey)) {
 
         const existingCategory = await Category.findOne({ categoryKey });
@@ -248,7 +245,7 @@ const processAndSaveCategories = async () => {
         const coverImageUploadResponse = await uploadToS3(coverImageName, coverImageBlob);
         const coverImageUrl = coverImageUploadResponse.Location;
 
-        let processedImages = [];
+        const processedImages = [];
         let imageId = 0;
 
         for (const image of images) {
@@ -259,7 +256,7 @@ const processAndSaveCategories = async () => {
           const imageUploadResponse = await uploadToS3(imageName, imageBlob);
           const imageUrl = imageUploadResponse.Location;
           
-          let face_count = image?.multi_face ? 2 : await detectFacesInImageUrl(imageUrl);
+          const face_count = image?.multi_face ? 2 : await detectFacesInImageUrl(imageUrl);
 
           processedImages.push({
             id: imageId++,

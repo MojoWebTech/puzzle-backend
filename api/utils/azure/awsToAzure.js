@@ -1,8 +1,8 @@
 const { BlobServiceClient } = require("@azure/storage-blob");
 const axios = require("axios");
 const dotenv = require('dotenv');
-const Category = require("../models/Category");
-const HotNew = require("../models/HotNew");
+const Category = require("../../models/Category");
+const HotNew = require("../../models/HotNew");
 const path = require('node:path');
 dotenv.config();
 

@@ -1,7 +1,7 @@
 const { S3 } = require('@aws-sdk/client-s3');
 const mongoose = require('mongoose');
-const Category = require('../models/Category');
-const HotNew = require('../models/HotNew');
+const Category = require('../../models/Category');
+const HotNew = require('../../models/HotNew');
 const dotenv = require('dotenv');
 
 dotenv.config();

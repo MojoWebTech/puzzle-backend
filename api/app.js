@@ -10,6 +10,7 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
 const formRoutes = require('./routes/formRoutes');
 const swapRoutes = require('./routes/swapRoutes');
+const proxyRoutes = require('./routes/proxyRoutes');
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.get('/', (req, res) => res.send('Hello there!'));
 app.use('/webhook', webhookRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/swap', swapRoutes);
+app.use('/proxy', proxyRoutes);
 app.use('/', formRoutes);
 
 const PORT = process.env.PORT || 8080;

@@ -5,7 +5,8 @@ const convertImageToBase64 = async (req, res) => {
 
   try {
     const response = await fetch(imageUrl);
-    const buffer = await response.buffer();
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
     let base64Image;
     if (response.headers.get('content-type') === 'image/webp') {

@@ -1,6 +1,7 @@
 
 const { GENDER_API_URL } = require('../config/utils');
 const Category = require('../models/Category');
+const HotNew = require('../models/HotNew');
 
 
 const getGender = async (name) => {
@@ -56,7 +57,7 @@ const getFirstData = async (req, res) => {
       return res.status(500).json({ message: "Failed to determine gender." });
     }
   }
-
+  
   const categories = await Category.find()
     .select({ themeName: 1, coverImage: 1, categoryKey: 1, gender: 1, images: { $slice: 10 } })
     .lean();

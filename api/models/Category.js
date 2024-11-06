@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const imageSchema = require('./Image');
 
-// Define the category schema
 const categorySchema = new mongoose.Schema({
   themeName: String,
   coverImage: String,
@@ -13,7 +12,6 @@ const categorySchema = new mongoose.Schema({
   },
 });
 
-// Create the Category model using the schema
 const Category = mongoose.model('Category', categorySchema);
 
 module.exports = Category;

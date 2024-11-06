@@ -12,6 +12,8 @@ const { processAndSaveCategories, updateImageGender } = require('./data/utils');
 require('dotenv').config()
 
 const path = require('node:path');
+const { uploadAllImagesToAzure } = require('./data/azure');
+const { updateImageUrlsInDb } = require('./data/awstodb');
 const app = express();
 
 app.use(express.static(path.join(__dirname, '../public')));
@@ -31,10 +33,7 @@ app.use(body_parser.json());
 const URI = process.env.MONGODB_URI;
   mongoose.connect(URI || '', {serverSelectionTimeoutMS: 10000})
   .then(async() => {
-    console.log('Connected to MongoDB');
-    // Seed db
-    // processAndSaveCategories(); 
-    // updateImageGender(); 
+    console.log('Connected to MongoDB'); 
   })
   .catch(err => console.error('Could not connect to MongoDB', err));
 
@@ -46,6 +45,6 @@ const URI = process.env.MONGODB_URI;
 
 
 
-const PORT = process.env.PORT || 8080; // azure port
+const PORT = process.env.PORT || 8080; 
 
 app.listen(PORT, () => console.log("Server ready on port ",PORT));

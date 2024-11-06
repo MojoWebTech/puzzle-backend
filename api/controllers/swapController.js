@@ -1,8 +1,7 @@
-const fetch = require('node-fetch');
 const User = require('../models/User');
 const Category = require('../models/Category');
 const { swapFace } = require('../swap/api-calls');
-const { FB_GRAPH_URL } = require('../config/fb');
+const { FB_GRAPH_URL } = require('../config/utils');
 require('dotenv').config();
 
 

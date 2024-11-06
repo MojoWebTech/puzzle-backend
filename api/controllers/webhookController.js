@@ -1,6 +1,5 @@
-const fetch = require('node-fetch');
 const Notification = require('../models/Notification');
-const { FB_GRAPH_URL } = require('../config/fb');
+const { FB_GRAPH_URL } = require('../config/utils');
 require('dotenv').config();
 
 

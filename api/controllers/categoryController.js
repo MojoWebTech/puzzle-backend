@@ -1,7 +1,6 @@
 
 const { GENDER_API_URL } = require('../config/utils');
 const Category = require('../models/Category');
-const fetch = require('node-fetch');
 
 
 const getGender = async (name) => {

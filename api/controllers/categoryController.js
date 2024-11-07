@@ -49,7 +49,7 @@ const getFirstData = async (req, res) => {
     return res.status(400).json({ error: 'Name is required' });
   }
 
-  if (!gender) {
+  if (gender!=="MALE" && gender!=="FEMALE") {
     try {
       gender = await getGender(name);
     } catch (error) {
